@@ -514,6 +514,13 @@ async function initDashboard() {
         if (elCal) elCal.textContent = inCalibration;
         if (elShp) elShp.textContent = shippedToday;
     }
+
+    // Check URL view parameters (e.g. from detail.html redirects)
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get("view");
+    if (viewParam) {
+        switchView(viewParam);
+    }
 }
 
 // ==========================================

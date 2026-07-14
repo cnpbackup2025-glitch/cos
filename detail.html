@@ -40,9 +40,14 @@
             </div>
             
             <nav class="nav-menu">
-                <li class="nav-item">
-                    <a href="index.html">
+                <li class="nav-item" id="nav-dashboard">
+                    <a href="index.html?view=dashboard">
                         <i data-lucide="layout-dashboard"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item" id="nav-users" style="display:none;">
+                    <a href="index.html?view=users">
+                        <i data-lucide="users"></i> Manajemen Staf
                     </a>
                 </li>
                 <li class="nav-item active">
@@ -60,13 +65,13 @@
                         <i data-lucide="flask-conical"></i> Modul Sampel <span class="badge badge-neutral" style="font-size: 0.6rem; padding: 2px 6px; margin-left: 8px;">V3.0</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#">
+                <li class="nav-item" id="nav-master">
+                    <a href="index.html?view=master">
                         <i data-lucide="database"></i> Master Data
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#">
+                <li class="nav-item" id="nav-audit">
+                    <a href="index.html?view=audit">
                         <i data-lucide="history"></i> Audit Log
                     </a>
                 </li>
