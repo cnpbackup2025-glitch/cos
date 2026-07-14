@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard Operasional Internal CV Cahaya Nuklida Persada">
+    <title>COS - Dashboard Operasional</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons Library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">C</div>
+                <div class="brand-info">
+                    <h1>COS</h1>
+                    <p>CNP Operational System</p>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <li class="nav-item active">
+                    <a href="index.html">
+                        <i data-lucide="layout-dashboard"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="detail.html">
+                        <i data-lucide="activity"></i> Detil Pekerjaan (Demo)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" style="opacity: 0.6; cursor: not-allowed;" title="Akan hadir di V2.0">
+                        <i data-lucide="mail"></i> Modul TLD <span class="badge badge-neutral" style="font-size: 0.6rem; padding: 2px 6px; margin-left: 8px;">V2.0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" style="opacity: 0.6; cursor: not-allowed;" title="Akan hadir di V3.0">
+                        <i data-lucide="flask-conical"></i> Modul Sampel <span class="badge badge-neutral" style="font-size: 0.6rem; padding: 2px 6px; margin-left: 8px;">V3.0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i data-lucide="database"></i> Master Data
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i data-lucide="history"></i> Audit Log
+                    </a>
+                </li>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-avatar">SP</div>
+                <div class="user-info">
+                    <h4>Supriyanto Pratama</h4>
+                    <p>Supervisor AUR</p>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <!-- HEADER -->
+            <header class="header-bar">
+                <div class="page-title">
+                    <h2>Dashboard Operasional</h2>
+                    <p>Sistem Informasi CV Cahaya Nuklida Persada - Modul Alat Ukur Radiasi (AUR)</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-accent" id="btn-open-modal">
+                        <i data-lucide="plus-circle"></i> Tambah PO / Alat Baru
+                    </button>
+                </div>
+            </header>
+            
+            <!-- METRICS CARDS -->
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon blue">
+                        <i data-lucide="file-text"></i>
+                    </div>
+                    <div class="metric-details">
+                        <p>PO Aktif</p>
+                        <h3 id="metric-po-active">12</h3>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon amber">
+                        <i data-lucide="wrench"></i>
+                    </div>
+                    <div class="metric-details">
+                        <p>Dalam Servis</p>
+                        <h3 id="metric-service">3</h3>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon blue">
+                        <i data-lucide="activity"></i>
+                    </div>
+                    <div class="metric-details">
+                        <p>Dalam Kalibrasi</p>
+                        <h3 id="metric-calibration">6</h3>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon green">
+                        <i data-lucide="truck"></i>
+                    </div>
+                    <div class="metric-details">
+                        <p>Dikirim Hari Ini</p>
+                        <h3 id="metric-shipment">2</h3>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- MAIN GRID CONTENT -->
+            <div class="content-grid">
+                <!-- LEFT COLUMN: MAIN JOBS TABLE -->
+                <section class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Alat Ukur Radiasi (AUR) Sedang Berjalan</h3>
+                        </div>
+                        <span class="badge badge-info" id="table-row-count">5 Data Terkini</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Search and Filter -->
+                        <div class="filter-bar">
+                            <div class="search-input-wrapper">
+                                <i data-lucide="search" class="search-icon"></i>
+                                <input type="text" id="search-box" class="search-input" placeholder="Cari PO, Instansi, atau Nomor Seri...">
+                            </div>
+                            <select id="filter-status" class="filter-select">
+                                <option value="all">Semua Status</option>
+                                <option value="Tahap 1">Tahap 1: Diterima</option>
+                                <option value="Tahap 2">Tahap 2: Pemeriksaan</option>
+                                <option value="Tahap 3">Tahap 3: Servis</option>
+                                <option value="Tahap 4">Tahap 4: Kalibrasi</option>
+                                <option value="Tahap 5">Tahap 5: Billing</option>
+                                <option value="Tahap 6">Tahap 6: Sertifikat</option>
+                                <option value="Tahap 7">Tahap 7: Pengiriman</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Table -->
+                        <div class="table-container">
+                            <table class="data-table" id="jobs-table">
+                                <thead>
+                                    <tr>
+                                        <th>No. PO</th>
+                                        <th>Instansi</th>
+                                        <th>Nama Alat</th>
+                                        <th>No. Seri</th>
+                                        <th>Tahap Aktif</th>
+                                        <th>Status Detail</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-status="Tahap 4">
+                                        <td><strong>PO-2026-0089</strong></td>
+                                        <td>PT Pertamina Hulu Rokan</td>
+                                        <td>Fluke 451B Ion Chamber</td>
+                                        <td>SN-451B08821</td>
+                                        <td><span class="badge badge-info">Tahap 4: Kalibrasi</span></td>
+                                        <td>Masuk Lab BRIN (WO-89)</td>
+                                        <td><a href="detail.html?po=PO-2026-0089" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
+                                    </tr>
+                                    <tr data-status="Tahap 3">
+                                        <td><strong>PO-2026-0090</strong></td>
+                                        <td>PT Indonesia Power Cilegon</td>
+                                        <td>Ludlum Model 3 Survey Meter</td>
+                                        <td>SN-L3-99827</td>
+                                        <td><span class="badge badge-warning">Tahap 3: Servis</span></td>
+                                        <td>Menunggu Persetujuan Servis</td>
+                                        <td><a href="detail.html?po=PO-2026-0090" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
+                                    </tr>
+                                    <tr data-status="Tahap 1">
+                                        <td><strong>PO-2026-0091</strong></td>
+                                        <td>RSUD Dr. Soetomo</td>
+                                        <td>Polimaster PM1703M</td>
+                                        <td>SN-PM17-00912</td>
+                                        <td><span class="badge badge-neutral">Tahap 1: Diterima</span></td>
+                                        <td>Admin Menerima Paket & Foto</td>
+                                        <td><a href="detail.html?po=PO-2026-0091" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
+                                    </tr>
+                                    <tr data-status="Tahap 6">
+                                        <td><strong>PO-2026-0092</strong></td>
+                                        <td>PT Medco E&P Natuna</td>
+                                        <td>Thermo RadEye PRD</td>
+                                        <td>SN-REPRD-7721</td>
+                                        <td><span class="badge badge-info">Tahap 6: Sertifikat</span></td>
+                                        <td>Proses Upload Sertifikat</td>
+                                        <td><a href="detail.html?po=PO-2026-0092" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
+                                    </tr>
+                                    <tr data-status="Tahap 7">
+                                        <td><strong>PO-2026-0093</strong></td>
+                                        <td>Universitas Gadjah Mada</td>
+                                        <td>Savel Gamma Area Monitor</td>
+                                        <td>SN-GAM-90082</td>
+                                        <td><span class="badge badge-success">Tahap 7: Pengiriman</span></td>
+                                        <td>Dalam Pengiriman (Resi JNE)</td>
+                                        <td><a href="detail.html?po=PO-2026-0093" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- RIGHT COLUMN: ACTIVITY TIMELINE & DEADLINE -->
+                <aside class="sidebar-right">
+                    <!-- Global Activity Timeline -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h3>Aktivitas Operasional</h3>
+                            </div>
+                            <i data-lucide="clock" class="text-secondary" style="width:18px;height:18px;"></i>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline-feed">
+                                <div class="timeline-feed-item success">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <span class="timeline-user">Budi (Logistik)</span> mengirimkan alat PO-2026-0093 via JNE.
+                                    </div>
+                                    <div class="timeline-time">Hari ini, 15:45</div>
+                                </div>
+                                <div class="timeline-feed-item info">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <span class="timeline-user">Siti (Admin AUR)</span> mengunggah file penawaran servis untuk PO-2026-0090.
+                                    </div>
+                                    <div class="timeline-time">Hari ini, 14:20</div>
+                                </div>
+                                <div class="timeline-feed-item warning">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <span class="timeline-user">Agus (Teknisi)</span> mendeteksi kerusakan sensor pada Ludlum PO-2026-0090.
+                                    </div>
+                                    <div class="timeline-time">Hari ini, 11:05</div>
+                                </div>
+                                <div class="timeline-feed-item success">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <span class="timeline-user">Rian (Admin)</span> melakukan unboxing paket RSUD Dr. Soetomo PO-2026-0091.
+                                    </div>
+                                    <div class="timeline-time">Hari ini, 09:30</div>
+                                </div>
+                                <div class="timeline-feed-item info">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <span class="timeline-user">Siti (Admin AUR)</span> mendaftarkan WO kalibrasi BRIN untuk PO-2026-0089.
+                                    </div>
+                                    <div class="timeline-time">Kemarin, 16:15</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Deadlines -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h3>Mendekati Deadline</h3>
+                            </div>
+                            <i data-lucide="alert-triangle" class="text-secondary" style="width:18px;height:18px; color:var(--warning)"></i>
+                        </div>
+                        <div class="card-body" style="padding-top: 10px;">
+                            <div style="display: flex; flex-direction: column; gap: 14px;">
+                                <div style="border-left: 3px solid var(--danger); padding-left: 12px;">
+                                    <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">Ludlum SN-L3-99827</h4>
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary);">PO-2026-0090 - Estimasi Kalibrasi: 3 Hari Lagi</p>
+                                    <span class="badge badge-danger" style="font-size: 0.65rem; margin-top: 4px;">Perlu Konfirmasi Servis</span>
+                                </div>
+                                <div style="border-left: 3px solid var(--warning); padding-left: 12px;">
+                                    <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">Fluke SN-451B08821</h4>
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary);">PO-2026-0089 - Lab BRIN: 5 Hari Lagi</p>
+                                    <span class="badge badge-warning" style="font-size: 0.65rem; margin-top: 4px;">Sedang Kalibrasi</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+    
+    <!-- MODAL OVERLAY: TAMBAH PO / ALAT BARU -->
+    <div class="modal-overlay" id="add-po-modal">
+        <div class="modal-card">
+            <header class="modal-header">
+                <h3>Form Input PO & Alat Baru (Tahap 1)</h3>
+                <button class="modal-close" id="btn-close-modal">
+                    <i data-lucide="x"></i>
+                </button>
+            </header>
+            <div class="modal-body">
+                <form id="form-new-po">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="po-number">Nomor PO</label>
+                            <input type="text" id="po-number" class="form-input" placeholder="Contoh: PO-2026-0094" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="instansi">Nama Instansi</label>
+                            <input type="text" id="instansi" class="form-input" placeholder="PT / RSUD / Instansi..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plant">Nama Plant / Departemen</label>
+                            <input type="text" id="plant" class="form-input" placeholder="Contoh: Kilang Balikpapan / Radiologi" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estimasi">Estimasi Tanggal Selesai</label>
+                            <input type="date" id="estimasi" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="alat-name">Nama Alat</label>
+                            <input type="text" id="alat-name" class="form-input" placeholder="Contoh: Survey Meter" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="merk">Merk Alat</label>
+                            <input type="text" id="merk" class="form-input" placeholder="Contoh: Ludlum / Fluke" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tipe">Tipe / Model</label>
+                            <input type="text" id="tipe" class="form-input" placeholder="Contoh: Model 3 / 451B" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="serial-number">Nomor Seri (Serial Number)</label>
+                            <input type="text" id="serial-number" class="form-input" placeholder="SN-XXXXXXX" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="document-type">Tipe Dokumen Luaran</label>
+                            <select id="document-type" class="form-select" required>
+                                <option value="Sertifikat Resmi">Sertifikat Resmi (BRIN/BPAFK)</option>
+                                <option value="Surat Keterangan">Surat Keterangan (Informal/Internal)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Telegram Media Links Area -->
+                        <div class="form-group full-width">
+                            <h4 style="margin: 12px 0 8px 0; font-size: 0.875rem; color: var(--primary); display:flex; align-items:center; gap:6px;">
+                                <i data-lucide="send" style="width:16px;height:16px;"></i> Tautan Media Telegram (Optional / Single Source of Truth)
+                            </h4>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="position: relative;">
+                                    <i data-lucide="image" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--secondary); pointer-events: none;"></i>
+                                    <input type="text" id="link-foto-kardus" class="form-input" style="padding-left: 38px;" placeholder="Tautan Foto Kardus (contoh: https://t.me/c/12345/67)">
+                                </div>
+                                <div style="position: relative;">
+                                    <i data-lucide="camera" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--secondary); pointer-events: none;"></i>
+                                    <input type="text" id="link-foto-alat" class="form-input" style="padding-left: 38px;" placeholder="Tautan Foto Alat (contoh: https://t.me/c/12345/68)">
+                                </div>
+                                <div style="position: relative;">
+                                    <i data-lucide="video" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--secondary); pointer-events: none;"></i>
+                                    <input type="text" id="link-video-unboxing" class="form-input" style="padding-left: 38px;" placeholder="Tautan Video Unboxing (contoh: https://t.me/c/12345/69)">
+                                </div>
+                                <span class="file-hint"><i data-lucide="info" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Unggah foto & video ke grup/channel Telegram operasional, lalu salin tautan pesannya ke sini.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="modal-footer full-width" style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); padding-top: 16px; margin-top: 8px;">
+                            <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Batal</button>
+                            <button type="submit" class="btn btn-accent">Simpan & Terima Alat</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript files -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

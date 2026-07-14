@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Detil Alur Pekerjaan Alat - COS">
+    <title>COS - Detil Pekerjaan Alat</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons Library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">C</div>
+                <div class="brand-info">
+                    <h1>COS</h1>
+                    <p>CNP Operational System</p>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html">
+                        <i data-lucide="layout-dashboard"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="detail.html">
+                        <i data-lucide="activity"></i> Detil Pekerjaan (Demo)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" style="opacity: 0.6; cursor: not-allowed;" title="Akan hadir di V2.0">
+                        <i data-lucide="mail"></i> Modul TLD <span class="badge badge-neutral" style="font-size: 0.6rem; padding: 2px 6px; margin-left: 8px;">V2.0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" style="opacity: 0.6; cursor: not-allowed;" title="Akan hadir di V3.0">
+                        <i data-lucide="flask-conical"></i> Modul Sampel <span class="badge badge-neutral" style="font-size: 0.6rem; padding: 2px 6px; margin-left: 8px;">V3.0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i data-lucide="database"></i> Master Data
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i data-lucide="history"></i> Audit Log
+                    </a>
+                </li>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-avatar">SP</div>
+                <div class="user-info">
+                    <h4>Supriyanto Pratama</h4>
+                    <p>Supervisor AUR</p>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <!-- HEADER -->
+            <header class="header-bar">
+                <div class="page-title">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <a href="index.html" class="btn btn-secondary" style="padding: 8px 12px; border-radius: var(--radius-sm);">
+                            <i data-lucide="arrow-left" style="width:18px;height:18px;"></i> Kembali
+                        </a>
+                        <div>
+                            <h2 id="detail-tool-title">Fluke 451B Ion Chamber (SN-451B08821)</h2>
+                            <p>Pelacakan Alur Kerja Alat Ukur Radiasi (AUR)</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- DEMO INTERACTIVE CONTROLLER BANNER -->
+            <div class="demo-controller">
+                <div class="demo-title">
+                    <i data-lucide="sliders" style="color: var(--accent); width:22px; height:22px;"></i>
+                    <div>
+                        <h4 style="font-size: 0.9rem; font-weight: 700;">Pengendali Demo (Simulasi Tahap Alat)</h4>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">Klik tombol di samping untuk mensimulasikan perubahan status & timeline alat ini</p>
+                    </div>
+                </div>
+                <div class="demo-buttons">
+                    <button class="btn btn-secondary" onclick="setDemoStage(1)" style="font-size:0.75rem; padding: 6px 12px;">Tahap 1</button>
+                    <button class="btn btn-secondary" onclick="setDemoStage(2)" style="font-size:0.75rem; padding: 6px 12px;">Tahap 2</button>
+                    <button class="btn btn-secondary" onclick="setDemoStage(3)" style="font-size:0.75rem; padding: 6px 12px;">Tahap 3</button>
+                    <button class="btn btn-secondary" onclick="setDemoStage(4)" style="font-size:0.75rem; padding: 6px 12px;">Tahap 4</button>
+                    <button class="btn btn-secondary" onclick="setDemoStage(5)" style="font-size:0.75rem; padding: 6px 12px;">Tahap 5</button>
+                    <button class="btn btn-secondary" onclick="setDemoStage(6)" style="font-size:0.75rem; padding: 6px 12px;">Tahap 6</button>
+                    <button class="btn btn-secondary" onclick="setDemoStage(7)" style="font-size:0.75rem; padding: 6px 12px;">Tahap 7</button>
+                </div>
+            </div>
+            
+            <!-- STEPPER HORIZONTAL PROGRESS BAR -->
+            <section class="stepper-container">
+                <div class="stepper">
+                    <div class="step-progress-bar" id="stepper-progress" style="width: 50%;"></div>
+                    
+                    <div class="step" id="step-1">
+                        <div class="step-icon">1</div>
+                        <div class="step-label">Penerimaan</div>
+                    </div>
+                    
+                    <div class="step" id="step-2">
+                        <div class="step-icon">2</div>
+                        <div class="step-label">Pemeriksaan</div>
+                    </div>
+                    
+                    <div class="step" id="step-3">
+                        <div class="step-icon">3</div>
+                        <div class="step-label">Servis</div>
+                    </div>
+                    
+                    <div class="step" id="step-4">
+                        <div class="step-icon">4</div>
+                        <div class="step-label">Kalibrasi</div>
+                    </div>
+                    
+                    <div class="step" id="step-5">
+                        <div class="step-icon">5</div>
+                        <div class="step-label">Billing</div>
+                    </div>
+                    
+                    <div class="step" id="step-6">
+                        <div class="step-icon">6</div>
+                        <div class="step-label">Sertifikat</div>
+                    </div>
+                    
+                    <div class="step" id="step-7">
+                        <div class="step-icon">7</div>
+                        <div class="step-label">Pengiriman</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- TOOL METADATA CARD -->
+            <section class="detail-header-card">
+                <h3 style="font-size: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Informasi Alat & PO</h3>
+                <div class="detail-info-grid">
+                    <div class="info-item">
+                        <label>Nomor PO</label>
+                        <span id="meta-po-number">PO-2026-0089</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Instansi Pelanggan</label>
+                        <span id="meta-instansi">PT Pertamina Hulu Rokan</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Lokasi / Plant</label>
+                        <span id="meta-plant">Rumbai, Riau</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Merk & Tipe Alat</label>
+                        <span id="meta-brand-model">Fluke / 451B</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Nomor Seri (SN)</label>
+                        <span id="meta-serial">SN-451B08821</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Tanggal Masuk</label>
+                        <span id="meta-date-entry">12 Juli 2026</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Estimasi Selesai</label>
+                        <span id="meta-date-est">22 Juli 2026</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Tipe Dokumen</label>
+                        <span id="meta-document-type">Sertifikat Resmi</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Status Saat Ini</label>
+                        <span class="badge badge-info" id="meta-status-badge">Tahap 4: Kalibrasi</span>
+                    </div>
+                    <!-- Data Tautan Telegram Tersembunyi -->
+                    <span id="meta-foto-kardus-link" style="display:none;">https://t.me/c/12345/67</span>
+                    <span id="meta-foto-alat-link" style="display:none;">https://t.me/c/12345/68</span>
+                    <span id="meta-video-unboxing-link" style="display:none;">https://t.me/c/12345/69</span>
+                </div>
+            </section>
+            
+            <!-- MIDDLE SECTION: DOCUMENTS GRID & PREVIEW -->
+            <div class="content-grid">
+                <!-- Documents List Card -->
+                <section class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Berkas & Media Terkait</h3>
+                        </div>
+                        <i data-lucide="files" class="text-secondary" style="width:18px;height:18px;"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="doc-list" id="document-list-container">
+                            <div class="doc-item active" onclick="loadPreview('po-pdf')" id="doc-po-pdf">
+                                <div class="doc-info">
+                                    <i data-lucide="file-text" class="doc-icon"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">PO_Pelanggan.pdf</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 1</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-neutral" style="font-size:0.65rem;">PDF</span>
+                            </div>
+                            
+                            <div class="doc-item" onclick="loadPreview('foto-kardus')" id="doc-foto-kardus">
+                                <div class="doc-info">
+                                    <i data-lucide="send" class="doc-icon" style="color: #229ED9;"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Foto Kardus Penerimaan (Telegram)</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 1</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-info" style="font-size:0.65rem; background-color: rgba(34, 158, 217, 0.1); color: #229ED9;">Telegram</span>
+                            </div>
+                            
+                            <div class="doc-item" onclick="loadPreview('foto-alat')" id="doc-foto-alat">
+                                <div class="doc-info">
+                                    <i data-lucide="send" class="doc-icon" style="color: #229ED9;"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Foto Alat Penerimaan (Telegram)</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 1</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-info" style="font-size:0.65rem; background-color: rgba(34, 158, 217, 0.1); color: #229ED9;">Telegram</span>
+                            </div>
+                            
+                            <div class="doc-item" onclick="loadPreview('video-unboxing')" id="doc-video-unboxing">
+                                <div class="doc-info">
+                                    <i data-lucide="send" class="doc-icon" style="color: #229ED9;"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Video Unboxing Paket (Telegram)</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 1</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-info" style="font-size:0.65rem; background-color: rgba(34, 158, 217, 0.1); color: #229ED9;">Telegram</span>
+                            </div>
+
+                            <div class="doc-item" onclick="loadPreview('foto-inspeksi')" id="doc-foto-inspeksi" style="display:none;">
+                                <div class="doc-info">
+                                    <i data-lucide="image" class="doc-icon"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Foto_Kerusakan_Sensor.jpg</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 2</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-neutral" style="font-size:0.65rem;">Image</span>
+                            </div>
+
+                            <div class="doc-item" onclick="loadPreview('penawaran-servis')" id="doc-penawaran-servis" style="display:none;">
+                                <div class="doc-info">
+                                    <i data-lucide="file-text" class="doc-icon"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Penawaran_Biaya_Servis.pdf</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 3</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-neutral" style="font-size:0.65rem;">PDF</span>
+                            </div>
+
+                            <div class="doc-item" onclick="loadPreview('wo-kalibrasi')" id="doc-wo-kalibrasi" style="display:none;">
+                                <div class="doc-info">
+                                    <i data-lucide="file-text" class="doc-icon"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Work_Order_BRIN_89.pdf</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 4</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-neutral" style="font-size:0.65rem;">PDF</span>
+                            </div>
+
+                            <div class="doc-item" onclick="loadPreview('invoice-pdf')" id="doc-invoice-pdf" style="display:none;">
+                                <div class="doc-info">
+                                    <i data-lucide="file-text" class="doc-icon"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Invoice_Billing_COS89.pdf</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 5</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-neutral" style="font-size:0.65rem;">PDF</span>
+                            </div>
+
+                            <div class="doc-item" onclick="loadPreview('sertifikat-pdf')" id="doc-sertifikat-pdf" style="display:none;">
+                                <div class="doc-info">
+                                    <i data-lucide="file-text" class="doc-icon"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Sertifikat_Kalibrasi_BRIN_89.pdf</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 6</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-neutral" style="font-size:0.65rem;">PDF</span>
+                            </div>
+
+                            <div class="doc-item" onclick="loadPreview('resi-jne')" id="doc-resi-jne" style="display:none;">
+                                <div class="doc-info">
+                                    <i data-lucide="truck" class="doc-icon"></i>
+                                    <div>
+                                        <div style="font-size:0.875rem;">Resi_JNE_Pengiriman.pdf</div>
+                                        <div style="font-size:0.75rem;color:var(--text-secondary);">Ditambahkan pada Tahap 7</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-neutral" style="font-size:0.65rem;">PDF</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Preview Canvas Card -->
+                <section class="card" style="display:flex; flex-direction:column;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3 id="preview-title">Preview: PO_Pelanggan.pdf</h3>
+                        </div>
+                        <i data-lucide="eye" class="text-secondary" style="width:18px;height:18px;"></i>
+                    </div>
+                    <div class="card-body" style="flex-grow:1; display:flex; align-items:stretch;" id="preview-canvas">
+                        <!-- Preview content injected via JavaScript -->
+                        <div class="pdf-mockup" id="po-pdf-preview" style="width:100%;">
+                            <div class="pdf-mockup-header">
+                                <h2 style="font-size: 1.1rem; color: var(--primary); font-weight: 700;">PT Pertamina Hulu Rokan</h2>
+                                <p style="font-size: 0.7rem; color: var(--text-secondary);">Rumbai Office, Pekanbaru, Riau | Telp: (0761) 12345</p>
+                            </div>
+                            <div class="pdf-mockup-body">
+                                <h3 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; text-transform: uppercase;">PURCHASE ORDER (PO)</h3>
+                                <p><strong>No. PO:</strong> PHR-2026-PO-0089</p>
+                                <p><strong>Tanggal:</strong> 10 Juli 2026</p>
+                                <p style="margin-top: 14px;"><strong>Pekerjaan:</strong> Jasa Servis & Kalibrasi Alat Ukur Radiasi (AUR)</p>
+                                <table style="width:100%; border-collapse: collapse; margin-top: 14px; font-size:0.7rem;">
+                                    <thead>
+                                        <tr style="border-bottom:1px solid #000; border-top:1px solid #000;">
+                                            <th style="padding:4px 0; text-align:left;">Item</th>
+                                            <th style="padding:4px 0; text-align:center;">Jumlah</th>
+                                            <th style="padding:4px 0; text-align:right;">Estimasi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding:4px 0;">Kalibrasi Alat Fluke 451B SN-451B08821</td>
+                                            <td style="padding:4px 0; text-align:center;">1 Unit</td>
+                                            <td style="padding:4px 0; text-align:right;">Rp 4.500.000</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="border-top: 1px solid var(--border); padding-top: 8px; font-size: 0.65rem; text-align: center; color: var(--text-muted);">
+                                Halaman 1 dari 1 | PO Terverifikasi Sistem
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- BOTTOM SECTION: TIMELINE FOR THIS TOOL -->
+            <section class="card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h3>Timeline Aktivitas Pekerjaan (Alat Ini)</h3>
+                    </div>
+                    <i data-lucide="git-commit" class="text-secondary" style="width:18px;height:18px;"></i>
+                </div>
+                <div class="card-body">
+                    <div class="timeline-feed" id="detail-timeline-container">
+                        <!-- Dynamic timeline items loaded by setDemoStage() -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- JavaScript files -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
