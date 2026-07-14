@@ -515,6 +515,10 @@ async function initDashboard() {
         if (elShp) elShp.textContent = shippedToday;
     }
 
+    // Load recent activities and deadlines dynamically from Supabase
+    await loadRecentOperationalActivities();
+    await loadApproachingDeadlines();
+
     // Check URL view parameters (e.g. from detail.html redirects)
     const urlParams = new URLSearchParams(window.location.search);
     const viewParam = urlParams.get("view");
@@ -1482,4 +1486,151 @@ function updateStaticTimeline(stageNum) {
     });
 
     timelineContainer.innerHTML = html;
+}
+
+// ==========================================
+// SIDEBAR WIDGETS: RECENT ACTIVITIES & DEADLINES (REAL-TIME)
+// ==========================================
+function getFriendlyTimeDifference(dateStr) {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+    
+    if (diffSec < 60) return "Baru saja";
+    if (diffMin < 60) return `${diffMin} Menit Lalu`;
+    if (diffHr < 24) return `${diffHr} Jam Lalu`;
+    if (diffDay === 1) return "Kemarin";
+    return `${diffDay} Hari Lalu`;
+}
+
+async function loadRecentOperationalActivities() {
+    const container = document.getElementById("recent-activities-container");
+    if (!container) return;
+    
+    let logs = [];
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from("timeline_logs")
+                .select("*, alats(serial_number, merk, tipe, pos(po_number))")
+                .order("created_at", { ascending: false })
+                .limit(5);
+            if (error) throw error;
+            logs = data || [];
+        } catch (e) {
+            console.error("Gagal load recent activities:", e);
+        }
+    }
+    
+    if (logs.length > 0) {
+        let html = "";
+        logs.forEach(item => {
+            const timeDiffStr = getFriendlyTimeDifference(item.created_at);
+            const poNum = item.alats && item.alats.pos ? item.alats.pos.po_number : "N/A";
+            const operator = item.operator_name || "Staf";
+            
+            let styleClass = "info";
+            if (item.stage === 1 || item.stage === 7) styleClass = "success";
+            else if (item.stage === 2 || item.stage === 5) styleClass = "warning";
+            
+            html += `
+                <div class="timeline-feed-item ${styleClass}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-user">${operator}</span> ${item.action_detail} <span class="badge badge-neutral" style="font-size:0.6rem; padding: 2px 4px; margin-left: 2px;">PO: ${poNum}</span>
+                    </div>
+                    <div class="timeline-time">${timeDiffStr}</div>
+                </div>`;
+        });
+        container.innerHTML = html;
+    }
+}
+
+async function loadApproachingDeadlines() {
+    const container = document.getElementById("deadlines-container");
+    if (!container) return;
+    
+    let deadlineAlats = [];
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from("alats")
+                .select("*, pos(*)")
+                .neq("current_stage", 7) // Only active jobs
+                .order("created_at", { ascending: false })
+                .limit(3);
+            if (error) throw error;
+            
+            deadlineAlats = (data || []).sort((a, b) => {
+                const dateA = new Date(a.pos.estimasi_selesai || 0);
+                const dateB = new Date(b.pos.estimasi_selesai || 0);
+                return dateA - dateB;
+            });
+        } catch (e) {
+            console.error("Gagal load deadlines:", e);
+        }
+    }
+    
+    if (deadlineAlats.length > 0) {
+        let html = "";
+        const now = new Date();
+        now.setHours(0,0,0,0);
+        
+        deadlineAlats.forEach(item => {
+            const estimasiStr = item.pos.estimasi_selesai;
+            let diffDaysText = "N/A";
+            let borderStyle = "var(--info)";
+            let badgeClass = "badge-info";
+            
+            if (estimasiStr) {
+                const estDate = new Date(estimasiStr);
+                estDate.setHours(0,0,0,0);
+                const diffTime = estDate - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 0) {
+                    diffDaysText = `Terlambat ${Math.abs(diffDays)} Hari`;
+                    borderStyle = "var(--danger)";
+                    badgeClass = "badge-danger";
+                } else if (diffDays === 0) {
+                    diffDaysText = "Hari Ini";
+                    borderStyle = "var(--warning)";
+                    badgeClass = "badge-warning";
+                } else {
+                    diffDaysText = `${diffDays} Hari Lagi`;
+                    if (diffDays <= 3) {
+                        borderStyle = "var(--danger)";
+                        badgeClass = "badge-danger";
+                    } else {
+                        borderStyle = "var(--warning)";
+                        badgeClass = "badge-warning";
+                    }
+                }
+            }
+            
+            const statusTextList = [
+                "Penerimaan",
+                "Pemeriksaan Awal",
+                "Servis Alat",
+                "Kalibrasi Lab",
+                "Billing Pembayaran",
+                "Penerbitan Dokumen",
+                "Pengiriman"
+            ];
+            
+            const currentStageText = statusTextList[item.current_stage - 1] || "Proses";
+            
+            html += `
+                <div style="border-left: 3px solid ${borderStyle}; padding-left: 12px; margin-bottom: 14px;">
+                    <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">${item.merk} ${item.tipe} (SN: ${item.serial_number})</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">${item.pos.po_number} - Estimasi: ${diffDaysText}</p>
+                    <span class="badge ${badgeClass}" style="font-size: 0.65rem; margin-top: 4px;">Tahap ${item.current_stage}: ${currentStageText}</span>
+                </div>`;
+        });
+        container.innerHTML = html;
+    }
 }
