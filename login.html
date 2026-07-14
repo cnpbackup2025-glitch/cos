@@ -184,7 +184,7 @@
             pointer-events: none;
         }
 
-        .form-input, .form-select {
+        .form-input {
             width: 100%;
             padding: 10px 12px 10px 38px;
             border: 1px solid var(--border);
@@ -196,16 +196,7 @@
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .form-select {
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 14px;
-        }
-
-        .form-input:focus, .form-select:focus {
+        .form-input:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
@@ -257,6 +248,17 @@
             display: none;
             align-items: center;
             gap: 8px;
+        }
+
+        .info-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background-color: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            margin-top: 8px;
+            line-height: 1.3;
         }
     </style>
 </head>
@@ -315,19 +317,6 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="reg-role">Jabatan / Peran Operasional</label>
-                    <div class="input-wrapper">
-                        <i data-lucide="briefcase" class="input-icon"></i>
-                        <select id="reg-role" class="form-select" required>
-                            <option value="Supervisor AUR">Supervisor AUR (Akses Penuh)</option>
-                            <option value="Admin Gudang">Admin Gudang (PO & Terima Alat)</option>
-                            <option value="Teknisi Lab">Teknisi Lab (Inspeksi & Kalibrasi)</option>
-                            <option value="Logistik">Logistik (Pengemasan & JNE)</option>
-                            <option value="Finance">Finance (Billing & Invoice)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
                     <label for="reg-email">Alamat Email Kerja</label>
                     <div class="input-wrapper">
                         <i data-lucide="mail" class="input-icon"></i>
@@ -341,8 +330,15 @@
                         <input type="password" id="reg-password" class="form-input" placeholder="••••••••" minlength="6" required>
                     </div>
                 </div>
+                
+                <div class="info-hint">
+                    <i data-lucide="shield-check" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px; color: var(--accent);"></i>
+                    <strong>Pemberitahuan Sistem Keamanan:</strong><br>
+                    Pendaftar pertama otomatis didaftarkan sebagai <strong>Supervisor AUR (Admin)</strong>. Pendaftar selanjutnya akan didaftarkan sebagai <strong>Tamu / Guest</strong> dan wajib disetujui oleh Supervisor sebelum bisa mengakses data.
+                </div>
+
                 <button type="submit" class="btn-submit" id="btn-submit-register">
-                    Daftar & Masuk <i data-lucide="user-plus" style="width:16px;height:16px;"></i>
+                    Daftar Akun <i data-lucide="user-plus" style="width:16px;height:16px;"></i>
                 </button>
             </form>
         </div>
@@ -431,6 +427,24 @@
                 });
 
                 if (error) throw error;
+                
+                // Fetch dynamic role from profiles table to ensure RBAC is secure
+                const { data: profile, error: profileErr } = await supabaseClient
+                    .from("profiles")
+                    .select("role")
+                    .eq("id", data.user.id)
+                    .single();
+
+                if (profileErr) {
+                    // Profile not found? Let's auto-create one as Tamu as safety fallback
+                    await supabaseClient.from("profiles").insert([{
+                        id: data.user.id,
+                        full_name: data.user.user_metadata?.full_name || "Staf Baru",
+                        role: "Tamu",
+                        email: email
+                    }]);
+                }
+
                 window.location.href = "index.html";
             } catch (err) {
                 console.error(err);
@@ -446,7 +460,6 @@
         document.getElementById("form-register").addEventListener("submit", async (e) => {
             e.preventDefault();
             const fullName = document.getElementById("reg-fullname").value;
-            const role = document.getElementById("reg-role").value;
             const email = document.getElementById("reg-email").value;
             const password = document.getElementById("reg-password").value;
             const btn = document.getElementById("btn-submit-register");
@@ -454,13 +467,20 @@
             document.getElementById("alert-error").style.display = "none";
 
             if (!supabaseClient) {
-                alert("Supabase tidak terhubung. Membuat sesi simulasi...");
+                // Static Fallback Bootstrap Admin check
+                let mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+                const finalRole = (mockUsers.length === 0) ? 'Supervisor AUR' : 'Tamu';
+                
+                mockUsers.push({ id: Math.random().toString(), full_name: fullName, role: finalRole, email: email });
+                localStorage.setItem("mock_users", JSON.stringify(mockUsers));
+                
                 localStorage.setItem("mock_session", JSON.stringify({
                     user_metadata: {
                         full_name: fullName,
-                        role: role
+                        role: finalRole
                     }
                 }));
+                alert(`Sukses (Simulasi)! Mendaftar sebagai ${finalRole}`);
                 window.location.href = "index.html";
                 return;
             }
@@ -471,25 +491,47 @@
             lucide.createIcons();
 
             try {
+                // 1. Check if this is the first user registered in profiles
+                const { count, error: countError } = await supabaseClient
+                    .from("profiles")
+                    .select("*", { count: "exact", head: true });
+
+                if (countError) throw countError;
+                const finalRole = (count === 0) ? "Supervisor AUR" : "Tamu";
+
+                // 2. Perform supabase sign up
                 const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
                     options: {
                         data: {
                             full_name: fullName,
-                            role: role
+                            role: finalRole // also put it in metadata as fallback
                         }
                     }
                 });
 
                 if (error) throw error;
                 
-                // Supabase returns a session if confirm email is disabled
+                // 3. Create user profile in profiles table
+                if (data.user) {
+                    const { error: profileError } = await supabaseClient
+                        .from("profiles")
+                        .insert([{
+                            id: data.user.id,
+                            full_name: fullName,
+                            role: finalRole,
+                            email: email
+                        }]);
+
+                    if (profileError) throw profileError;
+                }
+
                 if (data.session) {
+                    alert(`Pendaftaran Berhasil!\n\nAnda terdaftar sebagai: ${finalRole}`);
                     window.location.href = "index.html";
                 } else {
-                    // Fallback alert if email confirmation is still active
-                    alert("Pendaftaran berhasil! Silakan periksa kotak masuk email Anda untuk mengonfirmasi akun sebelum masuk.");
+                    alert("Pendaftaran berhasil! Silakan periksa email Anda (jika email konfirmasi aktif) atau silakan coba login.");
                     switchTab('login');
                 }
             } catch (err) {

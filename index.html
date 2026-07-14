@@ -40,9 +40,14 @@
             </div>
             
             <nav class="nav-menu">
-                <li class="nav-item active">
-                    <a href="index.html">
+                <li class="nav-item active" id="nav-dashboard">
+                    <a href="#" onclick="switchView('dashboard')">
                         <i data-lucide="layout-dashboard"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item" id="nav-users" style="display:none;">
+                    <a href="#" onclick="switchView('users')">
+                        <i data-lucide="users"></i> Manajemen Staf
                     </a>
                 </li>
                 <li class="nav-item">
@@ -88,6 +93,8 @@
         
         <!-- MAIN CONTENT AREA -->
         <main class="main-content">
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard">
             <!-- HEADER -->
             <header class="header-bar">
                 <div class="page-title">
@@ -314,6 +321,41 @@
                         </div>
                     </div>
                 </aside>
+            </div>
+            
+            <!-- VIEW: USER MANAGEMENT -->
+            <div id="view-users" style="display:none; padding: 24px;">
+                <div class="header-bar" style="margin-bottom: 24px;">
+                    <div class="page-title">
+                        <h2>Manajemen Staf & Akses</h2>
+                        <p>Kelola hak akses dan peran operasional staf CV Cahaya Nuklida Persada</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Daftar Staf Terdaftar</h3>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding-top: 10px;">
+                        <div class="table-container">
+                            <table class="data-table" id="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Lengkap</th>
+                                        <th>Email</th>
+                                        <th>Tanggal Daftar</th>
+                                        <th>Peran / Jabatan</th>
+                                        <th>Aksi / Persetujuan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Injected via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>

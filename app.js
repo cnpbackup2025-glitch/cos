@@ -21,7 +21,7 @@ if (supabaseLib &&
 // ==========================================
 // SESSION CHECKER & PROFILE RENDERING
 // ==========================================
-function getLoggedUser() {
+async function getLoggedUser() {
     // 1. Check Supabase Session
     if (supabaseClient) {
         const projectRef = "nwopquhapnuewpwumlad";
@@ -31,10 +31,28 @@ function getLoggedUser() {
                 const sessionObj = JSON.parse(sessionStr);
                 if (sessionObj && sessionObj.user) {
                     const user = sessionObj.user;
-                    return {
-                        name: user.user_metadata?.full_name || user.email,
-                        role: user.user_metadata?.role || "Supervisor AUR"
-                    };
+                    // Ambil peran (role) dari tabel profiles secara aman di database
+                    const { data: profile } = await supabaseClient
+                        .from("profiles")
+                        .select("role, full_name")
+                        .eq("id", user.id)
+                        .single();
+                        
+                    if (profile) {
+                        return {
+                            id: user.id,
+                            name: profile.full_name,
+                            role: profile.role,
+                            email: user.email
+                        };
+                    } else {
+                        return {
+                            id: user.id,
+                            name: user.user_metadata?.full_name || user.email,
+                            role: "Tamu",
+                            email: user.email
+                        };
+                    }
                 }
             } catch (e) {
                 console.error("Gagal membaca session Supabase:", e);
@@ -47,9 +65,14 @@ function getLoggedUser() {
     if (mockSessionStr) {
         try {
             const mockSession = JSON.parse(mockSessionStr);
+            const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+            const mockUser = mockUsers.find(u => u.email === mockSession.email);
+            
             return {
+                id: mockUser ? mockUser.id : "mock-id",
                 name: mockSession.user_metadata?.full_name || "Supriyanto Pratama (Guest)",
-                role: mockSession.user_metadata?.role || "Supervisor AUR"
+                role: mockUser ? mockUser.role : (mockSession.user_metadata?.role || "Tamu"),
+                email: mockSession.email
             };
         } catch (e) {
             console.error("Gagal membaca mock session:", e);
@@ -58,8 +81,8 @@ function getLoggedUser() {
     return null;
 }
 
-function checkSessionAndRenderSidebar() {
-    const user = getLoggedUser();
+async function checkSessionAndRenderSidebar() {
+    const user = await getLoggedUser();
     if (!user) {
         window.location.href = "login.html";
         return;
@@ -108,12 +131,64 @@ function checkSessionAndRenderSidebar() {
             btnOpenModal.style.display = "flex";
         }
     }
+
+    // Show/Hide User Management menu item based on Supervisor role
+    const navUsers = document.getElementById("nav-users");
+    if (navUsers) {
+        if (user.role === "Supervisor AUR") {
+            navUsers.style.display = "block";
+        } else {
+            navUsers.style.display = "none";
+        }
+    }
+
+    // Enforce Tamu Screen Block (Persetujuan Akun)
+    if (user.role === "Tamu") {
+        const dashboardMain = document.getElementById("view-dashboard");
+        if (dashboardMain) {
+            dashboardMain.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 64px 24px; text-align:center; min-height:60vh;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background-color: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                        <i data-lucide="shield-alert" style="width:40px; height:40px; color:var(--danger);"></i>
+                    </div>
+                    <h3 style="font-weight: 700; color: var(--primary); margin-bottom: 8px; font-size:1.3rem;">Menunggu Persetujuan Akun</h3>
+                    <p style="font-size:0.9rem; color:var(--text-secondary); max-width:440px; line-height:1.5;">Akun Anda berhasil didaftarkan namun belum disetujui untuk mengakses sistem operasional. Silakan hubungi **Supervisor AUR** untuk menyetujui akun Anda dan mengatur jabatan kerja Anda.</p>
+                </div>`;
+            if (typeof lucide !== "undefined") lucide.createIcons();
+        }
+    }
 }
 
+// VIEW SWITCHER FOR SINGLE PAGE DASHBOARD
+function switchView(viewName) {
+    const dashboardView = document.getElementById("view-dashboard");
+    const usersView = document.getElementById("view-users");
+    const navDashboard = document.getElementById("nav-dashboard");
+    const navUsers = document.getElementById("nav-users");
+    
+    if (!dashboardView || !usersView) return;
+    
+    if (viewName === 'dashboard') {
+        dashboardView.style.display = "block";
+        usersView.style.display = "none";
+        if (navDashboard) navDashboard.classList.add("active");
+        if (navUsers) navUsers.classList.remove("active");
+    } else if (viewName === 'users') {
+        dashboardView.style.display = "none";
+        usersView.style.display = "block";
+        if (navDashboard) navDashboard.classList.remove("active");
+        if (navUsers) navUsers.classList.add("active");
+        loadUsersList();
+    }
+}
+
+// Expose switchView to global window object
+window.switchView = switchView;
+
 // INITIALIZE LUCIDE ICONS ON PAGE LOAD
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // Amankan halaman dengan Auth
-    checkSessionAndRenderSidebar();
+    await checkSessionAndRenderSidebar();
 
     if (typeof lucide !== "undefined") {
         lucide.createIcons();
@@ -260,12 +335,13 @@ async function initDashboard() {
                     if (alatError) throw alatError;
 
                     // 3. Catat Timeline Log
+                    const loggedUser = await getLoggedUser();
                     const { error: logError } = await supabaseClient
                         .from("timeline_logs")
                         .insert([{
                             alat_id: alatData[0].id,
                             stage: 1,
-                            operator_name: getLoggedUser()?.name || "Rian (Admin)",
+                            operator_name: loggedUser?.name || "Rian (Admin)",
                             action_detail: "menerima paket alat di gudang, melakukan unboxing, mengunggah foto, dan memvalidasi berkas PO Pelanggan."
                         }]);
 
@@ -424,6 +500,110 @@ async function initDashboard() {
 }
 
 // ==========================================
+// USER MANAGEMENT VIEW LOGIC (users-table)
+// ==========================================
+async function loadUsersList() {
+    const tableBody = document.querySelector("#users-table tbody");
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px; color: var(--text-secondary);"><i data-lucide="loader-2" class="animate-spin" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:8px;"></i> Memuat data staf...</td></tr>`;
+    if (typeof lucide !== "undefined") lucide.createIcons();
+    
+    let users = [];
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from("profiles")
+                .select("*")
+                .order("created_at", { ascending: true });
+            if (error) throw error;
+            users = data || [];
+        } catch (e) {
+            console.error("Gagal memuat profil staf:", e);
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px; color: var(--danger);">Koneksi database gagal: ${e.message}</td></tr>`;
+            return;
+        }
+    } else {
+        users = JSON.parse(localStorage.getItem("mock_users") || "[]");
+    }
+    
+    tableBody.innerHTML = "";
+    if (users.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px; color: var(--text-secondary);">Tidak ada staf yang terdaftar di database.</td></tr>`;
+        return;
+    }
+    
+    const currentUser = await getLoggedUser();
+    
+    users.forEach(u => {
+        const tr = document.createElement("tr");
+        const dateStr = new Date(u.created_at || Date.now()).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+        
+        const roles = ["Supervisor AUR", "Admin Gudang", "Teknisi Lab", "Finance", "Logistik", "Tamu"];
+        let optionsHtml = roles.map(r => `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r}</option>`).join("");
+        
+        const isSelf = currentUser && currentUser.id === u.id;
+        const selectDisabled = isSelf ? "disabled" : "";
+        
+        tr.innerHTML = `
+            <td><strong>${u.full_name} ${isSelf ? '<span class="badge badge-neutral" style="font-size:0.6rem;padding:2px 4px;margin-left:4px;">Anda</span>' : ''}</strong></td>
+            <td>${u.email}</td>
+            <td>${dateStr}</td>
+            <td>
+                <select onchange="updateUserRole('${u.id}', this.value)" class="form-select" style="font-size:0.8rem; padding:4px 8px; width:auto; display:inline-block;" ${selectDisabled}>
+                    ${optionsHtml}
+                </select>
+            </td>
+            <td>
+                ${isSelf ? '<span style="font-size:0.75rem; color:var(--text-secondary);">Tidak dapat mendemosi akun sendiri</span>' : `<span style="font-size:0.75rem; color:var(--text-secondary);"><i data-lucide="refresh-cw" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> Otomatis Tersimpan</span>`}
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
+    
+    if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+    }
+}
+
+async function updateUserRole(userId, newRole) {
+    if (supabaseClient) {
+        try {
+            const { error } = await supabaseClient
+                .from("profiles")
+                .update({ role: newRole })
+                .eq("id", userId);
+            if (error) throw error;
+            alert(`Berhasil! Jabatan staf diperbarui menjadi "${newRole}".`);
+            await checkSessionAndRenderSidebar();
+            await loadUsersList();
+        } catch (e) {
+            console.error("Gagal mengupdate peran:", e);
+            alert(`Gagal memperbarui peran: ${e.message}`);
+        }
+    } else {
+        let mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+        mockUsers = mockUsers.map(u => {
+            if (u.id === userId) u.role = newRole;
+            return u;
+        });
+        localStorage.setItem("mock_users", JSON.stringify(mockUsers));
+        alert(`Sukses (Simulasi)! Jabatan diperbarui menjadi "${newRole}".`);
+        await checkSessionAndRenderSidebar();
+        await loadUsersList();
+    }
+}
+
+// Expose globally
+window.updateUserRole = updateUserRole;
+
+// ==========================================
 // 2. DETAIL WORKFLOW LOGIC (detail.html)
 // ==========================================
 let currentStage = 4; // Default stage
@@ -467,7 +647,7 @@ async function initDetailPage() {
             if (elVideo) elVideo.textContent = params.get("video") || "https://t.me/c/12345/69";
             
             currentStage = 4; 
-            setDemoStage(currentStage);
+            await setDemoStage(currentStage);
         }
     }
 }
@@ -517,7 +697,7 @@ async function loadToolDetailsFromSupabase(poParam) {
         
         // Load initial state
         currentStage = tool.current_stage;
-        setDemoStage(currentStage);
+        await setDemoStage(currentStage);
     } catch (err) {
         console.error("Gagal mengambil data detail alat:", err);
         alert(`Gagal koneksi database Supabase: ${err.message}. Menjalankan demo statis.`);
@@ -531,7 +711,7 @@ async function setDemoStage(stageNum) {
     // ------------------------------------------
     // ENFORCE ROLE-BASED ACCESS CONTROL (RBAC)
     // ------------------------------------------
-    const user = getLoggedUser();
+    const user = await getLoggedUser();
     if (!user) {
         window.location.href = "login.html";
         return;
@@ -542,7 +722,8 @@ async function setDemoStage(stageNum) {
         "Admin Gudang": [1, 5, 6],                // Penerimaan, Tagihan, dan Dokumen
         "Teknisi Lab": [2, 3, 4],                 // Inspeksi, Servis, dan Kalibrasi
         "Finance": [5],                           // Tagihan & Invoice
-        "Logistik": [7]                           // Pengiriman
+        "Logistik": [7],                          // Pengiriman
+        "Tamu": []                                // Menunggu persetujuan
     };
 
     const allowedStages = rolePermissions[user.role] || [];
@@ -1115,8 +1296,9 @@ function updateStaticTimeline(stageNum) {
     const timelineContainer = document.getElementById("detail-timeline-container");
     if (!timelineContainer) return;
     
-    const user = getLoggedUser();
-    const activeUserName = user ? user.name : "Rian (Admin)";
+    // Gunakan helper async secara tidak langsung melalui status statis
+    const mockSession = JSON.parse(localStorage.getItem("mock_session") || "{}");
+    const activeUserName = mockSession.user_metadata?.full_name || "Rian (Admin)";
 
     const timelineData = [
         { stage: 1, user: activeUserName, action: "menerima paket alat di gudang, melakukan unboxing, mengunggah foto, dan memvalidasi berkas PO Pelanggan.", time: "12 Juli 2026, 09:10", style: "success" },
