@@ -18,8 +18,103 @@ if (supabaseLib &&
     console.log("Supabase credentials not configured. Running in Static Fallback Mode.");
 }
 
+// ==========================================
+// SESSION CHECKER & PROFILE RENDERING
+// ==========================================
+function getLoggedUser() {
+    // 1. Check Supabase Session
+    if (supabaseClient) {
+        const projectRef = "nwopquhapnuewpwumlad";
+        const sessionStr = localStorage.getItem(`sb-${projectRef}-auth-token`);
+        if (sessionStr) {
+            try {
+                const sessionObj = JSON.parse(sessionStr);
+                if (sessionObj && sessionObj.user) {
+                    const user = sessionObj.user;
+                    return {
+                        name: user.user_metadata?.full_name || user.email,
+                        role: user.user_metadata?.role || "Supervisor AUR"
+                    };
+                }
+            } catch (e) {
+                console.error("Gagal membaca session Supabase:", e);
+            }
+        }
+    }
+    
+    // 2. Check Mock Session
+    const mockSessionStr = localStorage.getItem("mock_session");
+    if (mockSessionStr) {
+        try {
+            const mockSession = JSON.parse(mockSessionStr);
+            return {
+                name: mockSession.user_metadata?.full_name || "Supriyanto Pratama (Guest)",
+                role: mockSession.user_metadata?.role || "Supervisor AUR"
+            };
+        } catch (e) {
+            console.error("Gagal membaca mock session:", e);
+        }
+    }
+    return null;
+}
+
+function checkSessionAndRenderSidebar() {
+    const user = getLoggedUser();
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+    
+    // Update elements
+    const elName = document.getElementById("sidebar-fullname");
+    const elRole = document.getElementById("sidebar-role");
+    const elAvatar = document.getElementById("sidebar-avatar");
+    
+    if (elName) elName.textContent = user.name;
+    if (elRole) elRole.textContent = user.role;
+    if (elAvatar) {
+        const initials = user.name
+            .split(" ")
+            .filter(n => n.length > 0)
+            .map(n => n[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+        elAvatar.textContent = initials || "SP";
+    }
+
+    // Bind Logout
+    const btnLogout = document.getElementById("btn-logout");
+    if (btnLogout) {
+        // Remove existing listener to avoid duplication
+        const newBtn = btnLogout.cloneNode(true);
+        btnLogout.parentNode.replaceChild(newBtn, btnLogout);
+        
+        newBtn.addEventListener("click", async () => {
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            localStorage.removeItem("mock_session");
+            window.location.href = "login.html";
+        });
+    }
+
+    // Role-Based Button Visibility on Dashboard
+    const btnOpenModal = document.getElementById("btn-open-modal");
+    if (btnOpenModal) {
+        if (user.role !== "Supervisor AUR" && user.role !== "Admin Gudang") {
+            btnOpenModal.style.display = "none";
+        } else {
+            btnOpenModal.style.display = "flex";
+        }
+    }
+}
+
 // INITIALIZE LUCIDE ICONS ON PAGE LOAD
 document.addEventListener("DOMContentLoaded", () => {
+    // Amankan halaman dengan Auth
+    checkSessionAndRenderSidebar();
+
     if (typeof lucide !== "undefined") {
         lucide.createIcons();
     }
@@ -49,7 +144,7 @@ async function initDashboard() {
     const formNewPo = document.getElementById("form-new-po");
 
     // ------------------------------------------
-    // REGISTER EVENT LISTENERS FIRST (PREVENT BLOCKED CLICK)
+    // REGISTER EVENT LISTENERS FIRST
     // ------------------------------------------
     if (btnOpenModal && addPoModal) {
         btnOpenModal.addEventListener("click", () => {
@@ -170,7 +265,7 @@ async function initDashboard() {
                         .insert([{
                             alat_id: alatData[0].id,
                             stage: 1,
-                            operator_name: "Rian (Admin)",
+                            operator_name: getLoggedUser()?.name || "Rian (Admin)",
                             action_detail: "menerima paket alat di gudang, melakukan unboxing, mengunggah foto, dan memvalidasi berkas PO Pelanggan."
                         }]);
 
@@ -433,6 +528,29 @@ async function loadToolDetailsFromSupabase(poParam) {
 
 // Global function called by demo control buttons
 async function setDemoStage(stageNum) {
+    // ------------------------------------------
+    // ENFORCE ROLE-BASED ACCESS CONTROL (RBAC)
+    // ------------------------------------------
+    const user = getLoggedUser();
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const rolePermissions = {
+        "Supervisor AUR": [1, 2, 3, 4, 5, 6, 7], // Semua tahap
+        "Admin Gudang": [1, 5, 6],                // Penerimaan, Tagihan, dan Dokumen
+        "Teknisi Lab": [2, 3, 4],                 // Inspeksi, Servis, dan Kalibrasi
+        "Finance": [5],                           // Tagihan & Invoice
+        "Logistik": [7]                           // Pengiriman
+    };
+
+    const allowedStages = rolePermissions[user.role] || [];
+    if (!allowedStages.includes(stageNum)) {
+        alert(`Akses Ditolak!\n\nPeran Anda: "${user.role}" tidak memiliki wewenang untuk mengubah status pekerjaan ke Tahap ${stageNum}.`);
+        return;
+    }
+
     currentStage = stageNum;
     
     // 1. Update Progress Bar
@@ -572,7 +690,7 @@ async function setDemoStage(stageNum) {
                     .insert([{
                         alat_id: currentToolId,
                         stage: stageNum,
-                        operator_name: operatorNameList[stageNum - 1],
+                        operator_name: user.name, // Log the actual logged in user!
                         action_detail: actionTextList[stageNum - 1]
                     }]);
             }
@@ -985,7 +1103,7 @@ function loadPreview(docType) {
     }
 
     if (previewTitle) previewTitle.textContent = title;
-    canvas.innerHTML = html;
+    if (canvas) canvas.innerHTML = html;
     
     if (typeof lucide !== "undefined") {
         lucide.createIcons();
@@ -997,17 +1115,20 @@ function updateStaticTimeline(stageNum) {
     const timelineContainer = document.getElementById("detail-timeline-container");
     if (!timelineContainer) return;
     
+    const user = getLoggedUser();
+    const activeUserName = user ? user.name : "Rian (Admin)";
+
     const timelineData = [
-        { stage: 1, user: "Rian (Admin)", action: "menerima paket alat di gudang, melakukan unboxing, mengunggah foto, dan memvalidasi berkas PO Pelanggan.", time: "12 Juli 2026, 09:10", style: "success" },
-        { stage: 2, user: "Agus (Teknisi)", action: "melakukan inspeksi kelistrikan fisik alat. Ditemukan kerusakan sirkuit pada sensor detektor.", time: "12 Juli 2026, 14:30", style: "warning" },
-        { stage: 3, user: "Siti (Admin AUR)", action: "membuat surat penawaran biaya servis penggantian suku cadang sebesar Rp 2.000.000 dan mengirimkan ke WhatsApp pelanggan.", time: "13 Juli 2026, 10:15", style: "info" },
+        { stage: 1, user: activeUserName, action: "menerima paket alat di gudang, melakukan unboxing, mengunggah foto, dan memvalidasi berkas PO Pelanggan.", time: "12 Juli 2026, 09:10", style: "success" },
+        { stage: 2, user: activeUserName, action: "melakukan inspeksi kelistrikan fisik alat. Ditemukan kerusakan sirkuit pada sensor detektor.", time: "12 Juli 2026, 14:30", style: "warning" },
+        { stage: 3, user: activeUserName, action: "membuat surat penawaran biaya servis penggantian suku cadang sebesar Rp 2.000.000 dan mengirimkan ke WhatsApp pelanggan.", time: "13 Juli 2026, 10:15", style: "info" },
         { stage: 3, user: "Sistem (Customer)", action: "menyetujui penawaran biaya servis yang dikirimkan via tautan WhatsApp.", time: "13 Juli 2026, 15:00", style: "success" },
-        { stage: 4, user: "Agus (Teknisi)", action: "menyelesaikan servis perbaikan suku cadang sensor dan mendaftarkan alat untuk pengujian kalibrasi.", time: "14 Juli 2026, 09:30", style: "info" },
-        { stage: 4, user: "Siti (Admin AUR)", action: "mengirimkan alat ke fasilitas Laboratorium BRIN dan mengunggah dokumen Work Order Kalibrasi.", time: "14 Juli 2026, 11:15", style: "info" },
-        { stage: 5, user: "Siti (Admin AUR)", action: "menerbitkan invoice billing pembayaran perbaikan dan kalibrasi alat.", time: "15 Juli 2026, 10:00", style: "warning" },
-        { stage: 5, user: "Rian (Finance)", action: "memvalidasi transfer bank lunas dari pelanggan dan mengonfirmasi pelunasan tagihan billing.", time: "15 Juli 2026, 14:45", style: "success" },
-        { stage: 6, user: "Siti (Admin AUR)", action: "menerima dokumen Sertifikat Kalibrasi resmi dari BRIN and mengunggah salinan digitalnya ke sistem.", time: "16 Juli 2026, 11:30", style: "success" },
-        { stage: 7, user: "Budi (Logistik)", action: "mengemas kembali alat, menempelkan stiker kalibrasi, menyerahkan ke JNE, dan mengunggah nomor resi pengiriman.", time: "17 Juli 2026, 15:30", style: "success" }
+        { stage: 4, user: activeUserName, action: "menyelesaikan servis perbaikan suku cadang sensor dan mendaftarkan alat untuk pengujian kalibrasi.", time: "14 Juli 2026, 09:30", style: "info" },
+        { stage: 4, user: activeUserName, action: "mengirimkan alat ke fasilitas Laboratorium BRIN dan mengunggah dokumen Work Order Kalibrasi.", time: "14 Juli 2026, 11:15", style: "info" },
+        { stage: 5, user: activeUserName, action: "menerbitkan invoice billing pembayaran perbaikan dan kalibrasi alat.", time: "15 Juli 2026, 10:00", style: "warning" },
+        { stage: 5, user: activeUserName, action: "memvalidasi transfer bank lunas dari pelanggan dan mengonfirmasi pelunasan tagihan billing.", time: "15 Juli 2026, 14:45", style: "success" },
+        { stage: 6, user: activeUserName, action: "menerima dokumen Sertifikat Kalibrasi resmi dari BRIN dan mengunggah salinan digitalnya ke sistem.", time: "16 Juli 2026, 11:30", style: "success" },
+        { stage: 7, user: activeUserName, action: "mengemas kembali alat, menempelkan stiker kalibrasi, menyerahkan ke JNE, dan mengunggah nomor resi pengiriman.", time: "17 Juli 2026, 15:30", style: "success" }
     ];
 
     let html = "";

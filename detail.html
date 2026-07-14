@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <!-- Route Protection Guard -->
+    <script>
+        (function() {
+            const projectRef = "nwopquhapnuewpwumlad";
+            const sessionKey = `sb-${projectRef}-auth-token`;
+            const hasRealSession = localStorage.getItem(sessionKey);
+            const hasMockSession = localStorage.getItem("mock_session");
+            
+            if (!hasRealSession && !hasMockSession) {
+                window.location.href = "login.html";
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Detil Alur Pekerjaan Alat - COS">
@@ -59,12 +72,17 @@
                 </li>
             </nav>
             
-            <div class="sidebar-footer">
-                <div class="user-avatar">SP</div>
-                <div class="user-info">
-                    <h4>Supriyanto Pratama</h4>
-                    <p>Supervisor AUR</p>
+            <div class="sidebar-footer" style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:8px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="user-avatar" id="sidebar-avatar">SP</div>
+                    <div class="user-info">
+                        <h4 id="sidebar-fullname" style="font-size:0.85rem; font-weight:700; color:var(--primary);">Supriyanto Pratama</h4>
+                        <p id="sidebar-role" style="font-size:0.75rem; color:var(--text-secondary);">Supervisor AUR</p>
+                    </div>
                 </div>
+                <button id="btn-logout" title="Keluar Sistem" onmouseover="this.style.color='var(--danger)'; this.style.backgroundColor='rgba(239,68,68,0.1)';" onmouseout="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent';" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:6px; border-radius:4px; display:flex; align-items:center; justify-content:center; transition:color 0.2s, background-color 0.2s;">
+                    <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+                </button>
             </div>
         </aside>
         
