@@ -116,7 +116,7 @@
                     </div>
                     <div class="metric-details">
                         <p>PO Aktif</p>
-                        <h3 id="metric-po-active">12</h3>
+                        <h3 id="metric-po-active">-</h3>
                     </div>
                 </div>
                 
@@ -126,7 +126,7 @@
                     </div>
                     <div class="metric-details">
                         <p>Dalam Servis</p>
-                        <h3 id="metric-service">3</h3>
+                        <h3 id="metric-service">-</h3>
                     </div>
                 </div>
                 
@@ -136,7 +136,7 @@
                     </div>
                     <div class="metric-details">
                         <p>Dalam Kalibrasi</p>
-                        <h3 id="metric-calibration">6</h3>
+                        <h3 id="metric-calibration">-</h3>
                     </div>
                 </div>
                 
@@ -146,7 +146,7 @@
                     </div>
                     <div class="metric-details">
                         <p>Dikirim Hari Ini</p>
-                        <h3 id="metric-shipment">2</h3>
+                        <h3 id="metric-shipment">-</h3>
                     </div>
                 </div>
             </section>
@@ -195,50 +195,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr data-status="Tahap 4">
-                                        <td><strong>PO-2026-0089</strong></td>
-                                        <td>PT Pertamina Hulu Rokan</td>
-                                        <td>Fluke 451B Ion Chamber</td>
-                                        <td>SN-451B08821</td>
-                                        <td><span class="badge badge-info">Tahap 4: Kalibrasi</span></td>
-                                        <td>Masuk Lab BRIN (WO-89)</td>
-                                        <td><a href="detail.html?po=PO-2026-0089" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
-                                    </tr>
-                                    <tr data-status="Tahap 3">
-                                        <td><strong>PO-2026-0090</strong></td>
-                                        <td>PT Indonesia Power Cilegon</td>
-                                        <td>Ludlum Model 3 Survey Meter</td>
-                                        <td>SN-L3-99827</td>
-                                        <td><span class="badge badge-warning">Tahap 3: Servis</span></td>
-                                        <td>Menunggu Persetujuan Servis</td>
-                                        <td><a href="detail.html?po=PO-2026-0090" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
-                                    </tr>
-                                    <tr data-status="Tahap 1">
-                                        <td><strong>PO-2026-0091</strong></td>
-                                        <td>RSUD Dr. Soetomo</td>
-                                        <td>Polimaster PM1703M</td>
-                                        <td>SN-PM17-00912</td>
-                                        <td><span class="badge badge-neutral">Tahap 1: Diterima</span></td>
-                                        <td>Admin Menerima Paket & Foto</td>
-                                        <td><a href="detail.html?po=PO-2026-0091" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
-                                    </tr>
-                                    <tr data-status="Tahap 6">
-                                        <td><strong>PO-2026-0092</strong></td>
-                                        <td>PT Medco E&P Natuna</td>
-                                        <td>Thermo RadEye PRD</td>
-                                        <td>SN-REPRD-7721</td>
-                                        <td><span class="badge badge-info">Tahap 6: Sertifikat</span></td>
-                                        <td>Proses Upload Sertifikat</td>
-                                        <td><a href="detail.html?po=PO-2026-0092" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
-                                    </tr>
-                                    <tr data-status="Tahap 7">
-                                        <td><strong>PO-2026-0093</strong></td>
-                                        <td>Universitas Gadjah Mada</td>
-                                        <td>Savel Gamma Area Monitor</td>
-                                        <td>SN-GAM-90082</td>
-                                        <td><span class="badge badge-success">Tahap 7: Pengiriman</span></td>
-                                        <td>Dalam Pengiriman (Resi JNE)</td>
-                                        <td><a href="detail.html?po=PO-2026-0093" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">Detail <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a></td>
+                                    <tr>
+                                        <td colspan="7" style="text-align:center; padding: 32px 24px; color: var(--text-secondary);">
+                                            <i data-lucide="loader-2" class="animate-spin" style="width:22px;height:22px;display:inline-block;vertical-align:middle;margin-right:8px;color:var(--accent);"></i> Memuat data dari Supabase...
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -258,40 +218,8 @@
                         </div>
                         <div class="card-body">
                             <div class="timeline-feed" id="recent-activities-container">
-                                <div class="timeline-feed-item success">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-content">
-                                        <span class="timeline-user">Budi (Logistik)</span> mengirimkan alat PO-2026-0093 via JNE.
-                                    </div>
-                                    <div class="timeline-time">Hari ini, 15:45</div>
-                                </div>
-                                <div class="timeline-feed-item info">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-content">
-                                        <span class="timeline-user">Siti (Admin AUR)</span> mengunggah file penawaran servis untuk PO-2026-0090.
-                                    </div>
-                                    <div class="timeline-time">Hari ini, 14:20</div>
-                                </div>
-                                <div class="timeline-feed-item warning">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-content">
-                                        <span class="timeline-user">Agus (Teknisi)</span> mendeteksi kerusakan sensor pada Ludlum PO-2026-0090.
-                                    </div>
-                                    <div class="timeline-time">Hari ini, 11:05</div>
-                                </div>
-                                <div class="timeline-feed-item success">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-content">
-                                        <span class="timeline-user">Rian (Admin)</span> melakukan unboxing paket RSUD Dr. Soetomo PO-2026-0091.
-                                    </div>
-                                    <div class="timeline-time">Hari ini, 09:30</div>
-                                </div>
-                                <div class="timeline-feed-item info">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-content">
-                                        <span class="timeline-user">Siti (Admin AUR)</span> mendaftarkan WO kalibrasi BRIN untuk PO-2026-0089.
-                                    </div>
-                                    <div class="timeline-time">Kemarin, 16:15</div>
+                                <div style="text-align:center; padding: 24px 0; color: var(--text-secondary); font-size: 0.8rem;">
+                                    <i data-lucide="loader-2" class="animate-spin" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:8px;color:var(--accent);"></i> Memuat aktivitas...
                                 </div>
                             </div>
                         </div>
@@ -307,15 +235,8 @@
                         </div>
                         <div class="card-body" style="padding-top: 10px;">
                             <div style="display: flex; flex-direction: column; gap: 14px;" id="deadlines-container">
-                                <div style="border-left: 3px solid var(--danger); padding-left: 12px;">
-                                    <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">Ludlum SN-L3-99827</h4>
-                                    <p style="font-size: 0.75rem; color: var(--text-secondary);">PO-2026-0090 - Estimasi Kalibrasi: 3 Hari Lagi</p>
-                                    <span class="badge badge-danger" style="font-size: 0.65rem; margin-top: 4px;">Perlu Konfirmasi Servis</span>
-                                </div>
-                                <div style="border-left: 3px solid var(--warning); padding-left: 12px;">
-                                    <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">Fluke SN-451B08821</h4>
-                                    <p style="font-size: 0.75rem; color: var(--text-secondary);">PO-2026-0089 - Lab BRIN: 5 Hari Lagi</p>
-                                    <span class="badge badge-warning" style="font-size: 0.65rem; margin-top: 4px;">Sedang Kalibrasi</span>
+                                <div style="text-align:center; padding: 24px 0; color: var(--text-secondary); font-size: 0.8rem;">
+                                    <i data-lucide="loader-2" class="animate-spin" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:8px;color:var(--accent);"></i> Memuat tenggat...
                                 </div>
                             </div>
                         </div>
