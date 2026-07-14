@@ -163,22 +163,39 @@ async function checkSessionAndRenderSidebar() {
 function switchView(viewName) {
     const dashboardView = document.getElementById("view-dashboard");
     const usersView = document.getElementById("view-users");
+    const masterView = document.getElementById("view-master");
+    const auditView = document.getElementById("view-audit");
+    
     const navDashboard = document.getElementById("nav-dashboard");
     const navUsers = document.getElementById("nav-users");
+    const navMaster = document.getElementById("nav-master");
+    const navAudit = document.getElementById("nav-audit");
     
-    if (!dashboardView || !usersView) return;
+    // Hide all views
+    if (dashboardView) dashboardView.style.display = "none";
+    if (usersView) usersView.style.display = "none";
+    if (masterView) masterView.style.display = "none";
+    if (auditView) auditView.style.display = "none";
+    
+    // Remove active class from all nav items
+    const navItems = document.querySelectorAll(".nav-menu .nav-item");
+    navItems.forEach(item => item.classList.remove("active"));
     
     if (viewName === 'dashboard') {
-        dashboardView.style.display = "block";
-        usersView.style.display = "none";
+        if (dashboardView) dashboardView.style.display = "block";
         if (navDashboard) navDashboard.classList.add("active");
-        if (navUsers) navUsers.classList.remove("active");
     } else if (viewName === 'users') {
-        dashboardView.style.display = "none";
-        usersView.style.display = "block";
-        if (navDashboard) navDashboard.classList.remove("active");
+        if (usersView) usersView.style.display = "block";
         if (navUsers) navUsers.classList.add("active");
         loadUsersList();
+    } else if (viewName === 'master') {
+        if (masterView) masterView.style.display = "block";
+        if (navMaster) navMaster.classList.add("active");
+        loadMasterDataList();
+    } else if (viewName === 'audit') {
+        if (auditView) auditView.style.display = "block";
+        if (navAudit) navAudit.classList.add("active");
+        loadAuditLogsList();
     }
 }
 
@@ -602,6 +619,136 @@ async function updateUserRole(userId, newRole) {
 
 // Expose globally
 window.updateUserRole = updateUserRole;
+
+// ==========================================
+// MASTER DATA & AUDIT LOG LOAD LOGIC
+// ==========================================
+async function loadMasterDataList() {
+    const tableBody = document.querySelector("#master-table tbody");
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 24px; color: var(--text-secondary);"><i data-lucide="loader-2" class="animate-spin" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:8px;"></i> Memuat data master...</td></tr>`;
+    if (typeof lucide !== "undefined") lucide.createIcons();
+    
+    let alats = [];
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from("alats")
+                .select("*, pos(*)")
+                .order("created_at", { ascending: false });
+            if (error) throw error;
+            alats = data || [];
+        } catch (e) {
+            console.error("Gagal memuat master data:", e);
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 24px; color: var(--danger);">Koneksi database gagal: ${e.message}</td></tr>`;
+            return;
+        }
+    } else {
+        // Fallback to static data
+        alats = [
+            { id: "1", merk: "Fluke", tipe: "451B", serial_number: "SN-451B08821", alat_name: "Ion Chamber", pos: { po_number: "PO-2026-0089", instansi: "PT Pertamina Hulu Rokan", plant: "Rumbai, Riau" } },
+            { id: "2", merk: "Ludlum", tipe: "Model 3", serial_number: "SN-L3-99827", alat_name: "Survey Meter", pos: { po_number: "PO-2026-0090", instansi: "PT Indonesia Power Cilegon", plant: "Cilegon" } },
+            { id: "3", merk: "Polimaster", tipe: "PM1703M", serial_number: "SN-PM17-00912", alat_name: "Personal Radiation Detector", pos: { po_number: "PO-2026-0091", instansi: "RSUD Dr. Soetomo", plant: "Surabaya" } }
+        ];
+    }
+    
+    tableBody.innerHTML = "";
+    if (alats.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 24px; color: var(--text-secondary);">Tidak ada data alat di database.</td></tr>`;
+        return;
+    }
+    
+    alats.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${item.pos ? item.pos.po_number : '-'}</strong></td>
+            <td>${item.merk} ${item.tipe} (${item.alat_name})</td>
+            <td>${item.serial_number}</td>
+            <td>${item.pos ? item.pos.instansi : '-'}</td>
+            <td>${item.pos ? item.pos.plant : '-'}</td>
+            <td><span class="badge badge-success">Terdaftar</span></td>
+        `;
+        tableBody.appendChild(tr);
+    });
+    
+    if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+    }
+}
+
+async function loadAuditLogsList() {
+    const timelineContainer = document.getElementById("audit-timeline-container");
+    if (!timelineContainer) return;
+    
+    timelineContainer.innerHTML = `<div style="text-align:center; padding: 24px; color: var(--text-secondary);"><i data-lucide="loader-2" class="animate-spin" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:8px;"></i> Memuat log audit...</div>`;
+    if (typeof lucide !== "undefined") lucide.createIcons();
+    
+    let logs = [];
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from("timeline_logs")
+                .select("*, alats(*, pos(*))")
+                .order("created_at", { ascending: false });
+            if (error) throw error;
+            logs = data || [];
+        } catch (e) {
+            console.error("Gagal memuat audit log:", e);
+            timelineContainer.innerHTML = `<div style="text-align:center; padding: 24px; color: var(--danger);">Koneksi database gagal: ${e.message}</div>`;
+            return;
+        }
+    } else {
+        // Fallback static audit logs
+        logs = [
+            { id: "1", created_at: new Date().toISOString(), operator_name: "Rian (Admin)", action_detail: "menerima paket alat di gudang, melakukan unboxing, mengunggah foto, dan memvalidasi berkas PO Pelanggan.", stage: 1, alats: { serial_number: "SN-PM17-00912", merk: "Polimaster", tipe: "PM1703M", pos: { po_number: "PO-2026-0091" } } },
+            { id: "2", created_at: new Date(Date.now() - 3600000).toISOString(), operator_name: "Agus (Teknisi)", action_detail: "melakukan inspeksi kelistrikan fisik alat. Sirkuit detektor diperiksa.", stage: 2, alats: { serial_number: "SN-L3-99827", merk: "Ludlum", tipe: "Model 3", pos: { po_number: "PO-2026-0090" } } }
+        ];
+    }
+    
+    timelineContainer.innerHTML = "";
+    if (logs.length === 0) {
+        timelineContainer.innerHTML = `<div style="text-align:center; padding: 24px; color: var(--text-secondary);">Tidak ada catatan log aktivitas.</div>`;
+        return;
+    }
+    
+    let html = "";
+    logs.forEach(item => {
+        const formattedTime = new Date(item.created_at).toLocaleString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+        
+        let itemStyle = "info";
+        if (item.stage === 1 || item.stage === 7) itemStyle = "success";
+        else if (item.stage === 2) itemStyle = "warning";
+        else if (item.stage === 5) itemStyle = "warning";
+        
+        const poNum = item.alats && item.alats.pos ? item.alats.pos.po_number : "N/A";
+        const alatDesc = item.alats ? `${item.alats.merk} ${item.alats.tipe} (SN: ${item.alats.serial_number})` : "";
+        
+        html += `
+            <div class="timeline-feed-item ${itemStyle}" style="margin-bottom: 20px;">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span style="font-weight: 700; color: var(--primary-light);">${item.operator_name}</span> 
+                    ${item.action_detail} 
+                    <span class="badge badge-neutral" style="font-size:0.65rem; padding: 2px 6px; margin-left: 6px;">PO: ${poNum}</span>
+                    <span style="font-size:0.75rem; color:var(--text-secondary); display:block; margin-top:4px;">Alat: ${alatDesc}</span>
+                </div>
+                <div class="timeline-time" style="font-size:0.7rem; color:var(--text-muted); margin-top: 4px;">${formattedTime}</div>
+            </div>`;
+    });
+    
+    timelineContainer.innerHTML = html;
+    
+    if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+    }
+}
 
 // ==========================================
 // 2. DETAIL WORKFLOW LOGIC (detail.html)

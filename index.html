@@ -65,13 +65,13 @@
                         <i data-lucide="flask-conical"></i> Modul Sampel <span class="badge badge-neutral" style="font-size: 0.6rem; padding: 2px 6px; margin-left: 8px;">V3.0</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#">
+                <li class="nav-item" id="nav-master">
+                    <a href="#" onclick="switchView('master')">
                         <i data-lucide="database"></i> Master Data
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#">
+                <li class="nav-item" id="nav-audit">
+                    <a href="#" onclick="switchView('audit')">
                         <i data-lucide="history"></i> Audit Log
                     </a>
                 </li>
@@ -81,7 +81,7 @@
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div class="user-avatar" id="sidebar-avatar">SP</div>
                     <div class="user-info">
-                        <h4 id="sidebar-fullname" style="font-size:0.85rem; font-weight:700; color:var(--primary);">Supriyanto Pratama</h4>
+                        <h4 id="sidebar-fullname" style="font-size:0.85rem; font-weight:700; color:#FFFFFF;">Supriyanto Pratama</h4>
                         <p id="sidebar-role" style="font-size:0.75rem; color:var(--text-secondary);">Supervisor AUR</p>
                     </div>
                 </div>
@@ -354,6 +354,64 @@
                                     <!-- Injected via JavaScript -->
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VIEW: MASTER DATA -->
+            <div id="view-master" style="display:none; padding: 24px;">
+                <div class="header-bar" style="margin-bottom: 24px;">
+                    <div class="page-title">
+                        <h2>Registrasi Master Data Alat</h2>
+                        <p>Daftar lengkap seluruh alat ukur radiasi (AUR) yang terdaftar di CV Cahaya Nuklida Persada</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Registrasi Seluruh Alat</h3>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding-top: 10px;">
+                        <div class="table-container">
+                            <table class="data-table" id="master-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nomor PO</th>
+                                        <th>Nama & Tipe Alat</th>
+                                        <th>Nomor Seri (SN)</th>
+                                        <th>Instansi Pelanggan</th>
+                                        <th>Lokasi / Plant</th>
+                                        <th>Status Registrasi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Injected via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: AUDIT LOG -->
+            <div id="view-audit" style="display:none; padding: 24px;">
+                <div class="header-bar" style="margin-bottom: 24px;">
+                    <div class="page-title">
+                        <h2>Audit Log & Riwayat Aktivitas Sistem</h2>
+                        <p>Catatan pelacakan aktivitas operasional sistem secara real-time dari seluruh PO</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Catatan Aktivitas Sistem</h3>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 24px;">
+                        <div id="audit-timeline-container" class="timeline-feed">
+                            <!-- Injected via JavaScript -->
                         </div>
                     </div>
                 </div>
